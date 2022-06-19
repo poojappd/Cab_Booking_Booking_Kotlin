@@ -7,6 +7,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/kotlin" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/resources" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/Data_Resources" type="java-resource" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -24,11 +25,11 @@
           <root url="jar://$MODULE_DIR$/libs/junit-platform-commons-1.6.0.jar!/" />
           <root url="jar://$MODULE_DIR$/libs/junit-jupiter-engine-5.6.0.jar!/" />
           <root url="jar://$MODULE_DIR$/libs/junit-platform-engine-1.6.0.jar!/" />
-          <root url="jar://$KOTLIN_BUNDLED$/lib/kotlin-stdlib.jar!/" />
-          <root url="jar://$KOTLIN_BUNDLED$/lib/kotlin-reflect.jar!/" />
-          <root url="jar://$KOTLIN_BUNDLED$/lib/kotlin-test.jar!/" />
-          <root url="jar://$KOTLIN_BUNDLED$/lib/kotlin-stdlib-jdk7.jar!/" />
-          <root url="jar://$KOTLIN_BUNDLED$/lib/kotlin-stdlib-jdk8.jar!/" />
+          <root url="jar://$APPLICATION_HOME_DIR$/plugins/Kotlin/kotlinc/lib/kotlin-stdlib.jar!/" />
+          <root url="jar://$APPLICATION_HOME_DIR$/plugins/Kotlin/kotlinc/lib/kotlin-reflect.jar!/" />
+          <root url="jar://$APPLICATION_HOME_DIR$/plugins/Kotlin/kotlinc/lib/kotlin-test.jar!/" />
+          <root url="jar://$APPLICATION_HOME_DIR$/plugins/Kotlin/kotlinc/lib/kotlin-stdlib-jdk7.jar!/" />
+          <root url="jar://$APPLICATION_HOME_DIR$/plugins/Kotlin/kotlinc/lib/kotlin-stdlib-jdk8.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
@@ -43,11 +44,11 @@
           <root url="jar://$MODULE_DIR$/libs/junit-platform-commons-1.6.0-sources.jar!/" />
           <root url="jar://$MODULE_DIR$/libs/junit-jupiter-engine-5.6.0-sources.jar!/" />
           <root url="jar://$MODULE_DIR$/libs/junit-platform-engine-1.6.0-sources.jar!/" />
-          <root url="jar://$KOTLIN_BUNDLED$/lib/kotlin-stdlib-sources.jar!/" />
-          <root url="jar://$KOTLIN_BUNDLED$/lib/kotlin-reflect-sources.jar!/" />
-          <root url="jar://$KOTLIN_BUNDLED$/lib/kotlin-test-sources.jar!/" />
-          <root url="jar://$KOTLIN_BUNDLED$/lib/kotlin-stdlib-jdk7-sources.jar!/" />
-          <root url="jar://$KOTLIN_BUNDLED$/lib/kotlin-stdlib-jdk8-sources.jar!/" />
+          <root url="jar://$APPLICATION_HOME_DIR$/plugins/Kotlin/kotlinc/lib/kotlin-stdlib-sources.jar!/" />
+          <root url="jar://$APPLICATION_HOME_DIR$/plugins/Kotlin/kotlinc/lib/kotlin-reflect-sources.jar!/" />
+          <root url="jar://$APPLICATION_HOME_DIR$/plugins/Kotlin/kotlinc/lib/kotlin-test-sources.jar!/" />
+          <root url="jar://$APPLICATION_HOME_DIR$/plugins/Kotlin/kotlinc/lib/kotlin-stdlib-jdk7-sources.jar!/" />
+          <root url="jar://$APPLICATION_HOME_DIR$/plugins/Kotlin/kotlinc/lib/kotlin-stdlib-jdk8-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
