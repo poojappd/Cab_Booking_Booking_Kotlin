@@ -19,7 +19,7 @@ class CabCentre (val locatedAt: Location){
         allVehiclesInfo[VehicleType.BIKE] = mutableListOf()
     }
 
-    fun addDriverWithVehicle(newVehicle: Vehicle, newDriver: CabDriver) {
+    internal fun addDriverWithVehicle(newVehicle: Vehicle, newDriver: CabDriver) {
         //pre-assigned driver with vehicle shud only be passed
         newVehicle.vehicleDriverId = newDriver.driverId
         allVehicles[newVehicle.vehicleType]?.add(newVehicle)
@@ -33,15 +33,20 @@ class CabCentre (val locatedAt: Location){
 
     }
 
-    fun addDriver(newDriver: CabDriver, drivableVehicle:VehicleType){
+    internal fun addDriver(newDriver: CabDriver, drivableVehicle:VehicleType){
         val newVehicle = Garage.manufactureVehicle(drivableVehicle, locatedAt.stationPoint)
         addDriverWithVehicle(newVehicle, newDriver)
 
     }
 
-    //private fun
-    private fun getDriverFromId(driverId: String): CabDriver? {
-        return allDrivers[driverId]
+    internal fun arrangeCab(rideInfo: RideInfo) :Response{
+        val result = allDrivers.get(rideInfo.driverId)?.pickupPassenger(rideInfo)
+        return if (result == Unit) Response.SUCCESS else Response.INVALID_INFO_FOR_ARRANGE_CAB
+
+    }
+
+    fun getDriverNameFromId(driverId: String): String? {
+        return allDrivers[driverId]?.fullName
     }
 
 

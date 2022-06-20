@@ -49,10 +49,13 @@ internal object CabCentralHub {
       val searchResult:MutableList<CabSearchResult> = mutableListOf()
       chosenCabCentre.allVehiclesInfo.forEach{
          it.value.forEach { vehicleInfo ->
+
             if (vehicleInfo.availabilityStatus == AvailabilityStatus.AVAILABLE) {
-               searchResult.add(CabSearchResult(vehicleInfo.vehicleType, vehicleInfo.vehicleName, vehicleInfo.seatCount,
-                  FareCalculator.calculateFare(vehicleInfo.vehicleType, Map.calculateDistance(fromLocation, toLocation)))
-               )
+               val cabSearchResult = CabSearchResult(chosenCabCentre.locatedAt.stationPoint, vehicleInfo.vehicleType, vehicleInfo.vehicleName, vehicleInfo.seatCount,
+                  FareCalculator.calculateFare(vehicleInfo.vehicleType, Map.calculateDistance(fromLocation, toLocation)),
+                  vehicleInfo.driverId)
+
+               searchResult.add( cabSearchResult)
 
             }
 
@@ -62,58 +65,40 @@ internal object CabCentralHub {
    }
 
 
-   fun searchCabs(fromLocation: Location, toLocation: Location):CabSearchResult{
-      var searchResults:MutableList<CabSearchResult>
+   fun searchCabs(fromLocation: Location, toLocation: Location):List<CabSearchResult>{
+      var searchResults:MutableList<CabSearchResult> = mutableListOf()
       var stationPoint = fromLocation.stationPoint
-      var toRemove :StationPoint? = null
-      var flag = false
-      if(allCabCentres.containsKey(stationPoint)){
-         val chosenCabCentre = allCabCentres.get(stationPoint)!!
-         searchResults = getVehicleInfo(chosenCabCentre, fromLocation, toLocation)
-         if (searchResults.size == 0 ) {
-            flag = true
-            toRemove = chosenCabCentre.locatedAt.stationPoint
-         }
-
-
-
-      }
-      //.remove(StationPoint.THAILAVARAM)
-
-      if(!allCabCentres.containsKey(stationPoint) || flag){
-         flag = false
-         val otherCabCentrePoints = allCabCentres.keys
-         otherCabCentrePoints.remove(toRemove)
-         stationPoint = Map.getNearestStationPoints(fromLocation.stationPoint, otherCabCentrePoints )
-         val chosenCabCentre = allCabCentres.get(stationPoint)!!
-         searchResults = getVehicleInfo(chosenCabCentre, fromLocation, toLocation)
-
-
-
-      }
-
-
-      val nearestCabCentre:CabCentre
-      if(allCabCentres.containsKey(stationPoint))
-         nearestCabCentre = allCabCentres.get(stationPoint)!!
-
-         val nearestCabCentreList = Map.getNearestStationPoints(fromLocation, allCabCentres.keys)
-         for(i in nearestCabCentreList) {
-            searchResults = getVehicleInfo(allCabCentres.get(i)!!, fromLocation, toLocation)
+      val nearestCabCentreList = Map.getNearestStationPoints(fromLocation, allCabCentres.keys)
+         for(nearestCabCentre in nearestCabCentreList) {
+            searchResults = getVehicleInfo(allCabCentres.get(nearestCabCentre)!!, fromLocation, toLocation)
             if (searchResults.size > 0) {
-               break
+              break
             }
          }
 
+      return searchResults
+    }
 
+
+
+   fun arrangeCab(passengerName:String, currentLocation: Location, destination: Location, vehicleType: VehicleType,
+                  chosenCabCentrePoint: StationPoint, driverId: String):RideInfo{
+      var response = Response.NO_SUCH_CAB_CENTRES
+      val chosenCabCentre = allCabCentres.get(chosenCabCentrePoint)
+      if(chosenCabCentre != null){
+         val driverName = chosenCabCentre.getDriverNameFromId(driverId)!!
+         val rideInfo = RideInfo(passengerName, driverName, driverId, currentLocation,destination, IdGenerator.generateOtp() )
+         response = chosenCabCentre.arrangeCab(rideInfo)
+         return rideInfo
       }
-
-   }
-
-   fun arrangeCab(passengerName:String, sourceLocation: Location, vehicleType: VehicleType):RideInfo{
+      else{
+         throw Exception("d")
+      }
 
    }
 
 }
 
-data class CabSearchResult(val vehicleType: VehicleType, val vehicleName:String, val seatCount:Int, val fare:Double, val response: Response = Response.SUCCESS  )
+data class CabSearchResult(val cabCentreStationPoint:StationPoint, val vehicleType: VehicleType, val vehicleName:String, val seatCount:Int, val fare:Double, val driverId:String){
+
+}

@@ -1,15 +1,8 @@
 class PrimeSedan(vehicleId:UInt, vehicleName :String, numberPlate:String,
                  override var wifiEnabled: Boolean = false, override var moviesStreaming: Boolean = false,
                  override var musicStreaming: Boolean = false,
-) :Vehicle(vehicleId, vehicleName, VehicleType.CAR_SEDAN, numberPlate, 4 ), PrimeCars{
-    override fun activatePrime() {
-        wifiEnabled = true
-        moviesStreaming = true
-        musicStreaming = true
+) :Vehicle(vehicleId, vehicleName, VehicleType.CAR_SEDAN, numberPlate, 4 ) , PrimeCars{
 
-        println("Prime has been activated! Enjoy unlimited wifi with movies and music")
-
-    }
 
     companion object{
         const val baseFare = 57.4;
