@@ -1,3 +1,5 @@
+import VehicleType.*
+
 object FareCalculator {
     private const val miniRatePerKm = Mini.ratePerKm
     private const val sedanRatePerKm = PrimeSedan.ratePerKm
@@ -24,5 +26,15 @@ object FareCalculator {
 
 
     private fun calculateSEDANFare(km: Double): Double = sedanBaseFare + sedanRatePerKm * km
+
+    fun calculateFare(vehicleType: VehicleType, km:Double): Double {
+        return when(vehicleType){
+            CAR_SUV -> calculateSUVFare(km)
+            BIKE -> calculateBikeFare(km)
+            AUTO_RICKSHAW -> calculateAutoFare(km)
+            CAR_MINI -> calculateMiniFare(km)
+            CAR_SEDAN -> calculateSEDANFare(km)
+        }
+    }
 
 }

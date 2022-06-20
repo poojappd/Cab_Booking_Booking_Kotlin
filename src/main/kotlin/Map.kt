@@ -35,7 +35,7 @@ object Map {
 
     }
 
-    fun addToMap(location: Location){
+    internal fun addToMap(location: Location){
         allLocationsUnderBaseStations[location.stationPoint]?.add(location) ?: run{
            allLocationsUnderBaseStations.put(location.stationPoint, mutableListOf( location))
         }
@@ -58,29 +58,33 @@ object Map {
     fun getLocationByIndex(baseStationPoint: StationPoint, index:Int) =
         allLocationsUnderBaseStations.get(baseStationPoint)?.get(index - 1)
 
-    fun getNearestStationPoint(fromStationPoint: StationPoint, ToStationPoints : Array<StationPoint>) :StationPoint{
+    private fun getDistanceBetweenStationPoints(fromLocation: Location, ToStationPoints : Set<StationPoint>) :MutableMap<Location, Double>{
+        val cabCentreWithDistance = mutableMapOf<Location, Double>()
+        val source = fromLocation
+        ToStationPoints.forEach {
 
-        var minDistance = Double.MAX_VALUE
-        val source = allLocationsUnderBaseStations.get(fromStationPoint)?.get(0)
-        var nearestStationPoint : StationPoint = fromStationPoint
-        if(source != null) {
-            ToStationPoints.forEach {
-
-                if (it != fromStationPoint) {
-                    val destination = allLocationsUnderBaseStations.get(it)?.get(0)
-                    val currentDistance = destination?.let { dest -> calculateDistance(source, dest) }
-
+            if (it != fromLocation.stationPoint) {
+                val destination = allLocationsUnderBaseStations.get(it)?.get(0)
+                val currentDistance = destination?.let { dest -> calculateDistance(source, dest) }
+                if (destination != null) {
                     if (currentDistance != null) {
-                        if (currentDistance > minDistance) {
-                            minDistance = currentDistance
-                            nearestStationPoint = destination.stationPoint
-                        }
+                        cabCentreWithDistance.put(destination, currentDistance)
                     }
-
                 }
+
             }
         }
-    return nearestStationPoint
+    return cabCentreWithDistance
+    }
+
+    fun getNearestStationPoints(fromLocation: Location, ToStationPoints : Set<StationPoint>) : List<StationPoint> {
+
+        val stationPointWithDistance = getDistanceBetweenStationPoints( fromLocation, ToStationPoints).toList()
+        val sortedStationPoint:MutableList<StationPoint> = mutableListOf()
+        stationPointWithDistance.toList().sortedByDescending { it.second }.forEach { sortedStationPoint.add(it.first.stationPoint) }
+
+        return sortedStationPoint.toList()
+
     }
 
     }

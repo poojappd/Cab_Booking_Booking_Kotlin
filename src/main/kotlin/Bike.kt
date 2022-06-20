@@ -1,4 +1,4 @@
-class Bike (vehicleId:Int, vehicleName :String, numberPlate:String)
+class Bike (vehicleId:UInt, vehicleName :String, numberPlate:String)
     :Vehicle(vehicleId, vehicleName, VehicleType.BIKE, numberPlate, 1){
     companion object{
         const val bikeSpeedPerKmInMinutes = 2.6f

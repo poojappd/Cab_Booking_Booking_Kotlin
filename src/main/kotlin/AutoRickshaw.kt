@@ -1,4 +1,4 @@
-class AutoRickshaw (vehicleId:Int, vehicleName :String, numberPlate:String)
+class AutoRickshaw (vehicleId:UInt, vehicleName :String, numberPlate:String)
     :Vehicle(vehicleId, vehicleName, VehicleType.BIKE, numberPlate, 3){
 
     companion object{

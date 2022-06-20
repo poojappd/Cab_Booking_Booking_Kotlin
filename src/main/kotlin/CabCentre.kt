@@ -1,46 +1,49 @@
-class CabCentre (val locatedStationPoint: StationPoint){
+class CabCentre (val locatedAt: Location){
+    internal val allVehiclesInfo: MutableMap<VehicleType, MutableList<VehicleInfo>> = mutableMapOf()
 
-    private val activeVehiclesInfo: MutableMap<VehicleType, MutableList<VehicleInfo>> = mutableMapOf()
-    private val allAvailableVehicles: MutableMap<VehicleType, MutableList<Vehicle>> = mutableMapOf()
-    private val availableDrivers: MutableMap<String, CabDriver> = mutableMapOf()
+
+    private val allVehicles: MutableMap<VehicleType, MutableList<Vehicle>> = mutableMapOf()
+    private val allDrivers: MutableMap<String, CabDriver> = mutableMapOf()
 
     init {
 
-        allAvailableVehicles[VehicleType.CAR_SUV] = mutableListOf()
-        allAvailableVehicles[VehicleType.CAR_MINI] = mutableListOf()
-        allAvailableVehicles[VehicleType.CAR_SEDAN] = mutableListOf()
-        allAvailableVehicles[VehicleType.AUTO_RICKSHAW] = mutableListOf()
-        allAvailableVehicles[VehicleType.BIKE] = mutableListOf()
-        activeVehiclesInfo[VehicleType.CAR_SEDAN] = mutableListOf()
-        activeVehiclesInfo[VehicleType.CAR_SUV] = mutableListOf()
-        activeVehiclesInfo[VehicleType.CAR_MINI] = mutableListOf()
-        activeVehiclesInfo[VehicleType.AUTO_RICKSHAW] = mutableListOf()
-        activeVehiclesInfo[VehicleType.BIKE] = mutableListOf()
+        allVehicles[VehicleType.CAR_SUV] = mutableListOf()
+        allVehicles[VehicleType.CAR_MINI] = mutableListOf()
+        allVehicles[VehicleType.CAR_SEDAN] = mutableListOf()
+        allVehicles[VehicleType.AUTO_RICKSHAW] = mutableListOf()
+        allVehicles[VehicleType.BIKE] = mutableListOf()
+        allVehiclesInfo[VehicleType.CAR_SEDAN] = mutableListOf()
+        allVehiclesInfo[VehicleType.CAR_SUV] = mutableListOf()
+        allVehiclesInfo[VehicleType.CAR_MINI] = mutableListOf()
+        allVehiclesInfo[VehicleType.AUTO_RICKSHAW] = mutableListOf()
+        allVehiclesInfo[VehicleType.BIKE] = mutableListOf()
     }
 
     fun addDriverWithVehicle(newVehicle: Vehicle, newDriver: CabDriver) {
         //pre-assigned driver with vehicle shud only be passed
         newVehicle.vehicleDriverId = newDriver.driverId
-        allAvailableVehicles[newVehicle.vehicleType]?.add(newVehicle)
-        availableDrivers[newDriver.driverId] = newDriver
+        allVehicles[newVehicle.vehicleType]?.add(newVehicle)
+        allDrivers[newDriver.driverId] = newDriver
 
-        activeVehiclesInfo[newVehicle.vehicleType]?.add(
+        allVehiclesInfo[newVehicle.vehicleType]?.add(
             VehicleInfo(
                 newVehicle.vehicleType, newVehicle.vehicleId, newVehicle.numberPlate, newDriver.driverId,
-                newDriver.fullName, newVehicle.vehicleName)
+                newDriver.fullName, newVehicle.vehicleName, newVehicle.maxOccupants)
             )
 
     }
 
     fun addDriver(newDriver: CabDriver, drivableVehicle:VehicleType){
-        when(drivableVehicle){
-            VehicleType.CAR_SUV->
-            VehicleType.CAR_MINI ->
-            VehicleType.CAR_SEDAN ->
-            VehicleType.AUTO_RICKSHAW ->
-            VehicleType.BIKE ->
-        }
+        val newVehicle = Garage.manufactureVehicle(drivableVehicle, locatedAt.stationPoint)
+        addDriverWithVehicle(newVehicle, newDriver)
 
     }
+
+    //private fun
+    private fun getDriverFromId(driverId: String): CabDriver? {
+        return allDrivers[driverId]
+    }
+
+
 
 }
