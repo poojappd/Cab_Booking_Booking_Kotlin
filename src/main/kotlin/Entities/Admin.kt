@@ -1,0 +1,5 @@
+package Entities
+
+object Admin {
+
+}
