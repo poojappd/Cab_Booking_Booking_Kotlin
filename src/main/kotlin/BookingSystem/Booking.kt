@@ -1,4 +1,4 @@
-package Entities
+package BookingSystem
 
 import java.time.LocalDateTime
 

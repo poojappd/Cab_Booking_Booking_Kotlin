@@ -1,0 +1,5 @@
+package BookingSystem
+
+object Admin {
+
+}

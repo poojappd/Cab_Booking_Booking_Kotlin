@@ -1,4 +1,4 @@
-package Entities
+package BookingSystem
 
 enum class Response {
     ALL_CABS_ARE_BOOKED,

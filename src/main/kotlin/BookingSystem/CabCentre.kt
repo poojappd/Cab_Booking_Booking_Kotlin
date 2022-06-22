@@ -1,4 +1,4 @@
-package Entities
+package BookingSystem
 
 class CabCentre (val locatedAt: Location){
     internal val allVehiclesInfo: MutableMap<VehicleType, MutableList<VehicleInfo>> = mutableMapOf()
@@ -22,12 +22,10 @@ class CabCentre (val locatedAt: Location){
     }
 
     internal fun addDriverWithVehicle(newVehicle: Vehicle, newDriver: CabDriver) {
-        //pre-assigned driver with vehicle shud only be passed
         newVehicle.vehicleDriverId = newDriver.driverId
-        allVehicles[newVehicle.vehicleType]?.add(newVehicle)
+        allVehicles[newVehicle.vehicleType]!!.add(newVehicle)
         allDrivers[newDriver.driverId] = newDriver
-
-        allVehiclesInfo[newVehicle.vehicleType]?.add(
+        allVehiclesInfo[newVehicle.vehicleType]!!.add(
             VehicleInfo(
                 newVehicle.vehicleType, newVehicle.vehicleId, newVehicle.numberPlate, newDriver.driverId,
                 newDriver.fullName, newVehicle.vehicleName, newVehicle.maxOccupants)

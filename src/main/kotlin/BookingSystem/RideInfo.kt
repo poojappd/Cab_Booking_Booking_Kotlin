@@ -1,4 +1,4 @@
-package Entities
+package BookingSystem
 
 data class RideInfo(
     val passengerName: String,

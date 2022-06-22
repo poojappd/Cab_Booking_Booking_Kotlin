@@ -1,26 +1,16 @@
-package Entities
+package BookingSystem
 
 import java.io.BufferedReader
 import java.io.FileReader
 import java.util.*
 
 object Map {
-    private val allLocationsUnderBaseStations : MutableMap<StationPoint, MutableList<Location>> = EnumMap(StationPoint::class.java)
+    private val allLocationsUnderBaseStations = mutableMapOf<StationPoint, MutableList<Location>>()
+
     init {
-        allLocationsUnderBaseStations[StationPoint.THAILAVARAM] = mutableListOf()
-        allLocationsUnderBaseStations[StationPoint.GUDUVANCHERY] = mutableListOf()
-        allLocationsUnderBaseStations[StationPoint.VANDALUR] = mutableListOf()
-        allLocationsUnderBaseStations[StationPoint.TAMBARAM] = mutableListOf()
-        allLocationsUnderBaseStations[StationPoint.SANITORIUM] = mutableListOf()
-        allLocationsUnderBaseStations[StationPoint.CHROMEPET] = mutableListOf()
-        allLocationsUnderBaseStations[StationPoint.PALLAVARAM] = mutableListOf()
-        allLocationsUnderBaseStations[StationPoint.PAMMAL] = mutableListOf()
-        allLocationsUnderBaseStations[StationPoint.PERUNGALATHUR] = mutableListOf()
-        allLocationsUnderBaseStations[StationPoint.URAPPAKKAM] = mutableListOf()
-        allLocationsUnderBaseStations[StationPoint.TIRUSULAM] = mutableListOf()
-        allLocationsUnderBaseStations[StationPoint.MEENAMBAKKAM] = mutableListOf()
-        allLocationsUnderBaseStations[StationPoint.ALANDUR] = mutableListOf()
-        allLocationsUnderBaseStations[StationPoint.GUINDY] = mutableListOf()
+        StationPoint.values().forEach {
+            allLocationsUnderBaseStations[it] = mutableListOf()
+        }
 
         val fileName = "src/main/Data_Resources/MapData.CSV"
         val br = BufferedReader(FileReader(fileName))
@@ -42,9 +32,10 @@ object Map {
            allLocationsUnderBaseStations.put(location.stationPoint, mutableListOf( location))
         }
     }
+
     fun getBaseLocations() = StationPoint.values()
 
-    fun getLocationsFromBaseLocation(baseLocation: StationPoint) = allLocationsUnderBaseStations[baseLocation]?.toList()
+    fun getLocationsFromBaseLocation(baseLocation: StationPoint) = allLocationsUnderBaseStations[baseLocation]!!.toList()
 
     internal fun calculateDistance(fromLocation: Location, toLocation: Location) :Double {
         val x1Coordinate = fromLocation.x_coordinate
@@ -58,21 +49,16 @@ object Map {
     }
 
     fun getLocationByIndex(baseStationPoint: StationPoint, index:Int) =
-        allLocationsUnderBaseStations.get(baseStationPoint)?.get(index - 1)
+        allLocationsUnderBaseStations.get(baseStationPoint)!!.get(index - 1)
 
     private fun getDistanceBetweenStationPoints(fromLocation: Location, ToStationPoints : Set<StationPoint>) :MutableMap<Location, Double>{
         val cabCentreWithDistance = mutableMapOf<Location, Double>()
-        val source = fromLocation
-        ToStationPoints.forEach {
 
+        ToStationPoints.forEach {
             if (it != fromLocation.stationPoint) {
-                val destination = allLocationsUnderBaseStations.get(it)?.get(0)
-                val currentDistance = destination?.let { dest -> calculateDistance(source, dest) }
-                if (destination != null) {
-                    if (currentDistance != null) {
-                        cabCentreWithDistance.put(destination, currentDistance)
-                    }
-                }
+                val destination = allLocationsUnderBaseStations.get(it)!!.get(0)
+                val currentDistance = calculateDistance(fromLocation, destination)
+                cabCentreWithDistance.put(destination, currentDistance)
 
             }
         }
@@ -84,10 +70,13 @@ object Map {
         val stationPointWithDistance = getDistanceBetweenStationPoints( fromLocation, ToStationPoints).toList()
         val sortedStationPoint:MutableList<StationPoint> = mutableListOf()
         stationPointWithDistance.toList().sortedByDescending { it.second }.forEach { sortedStationPoint.add(it.first.stationPoint) }
-
         return sortedStationPoint.toList()
 
     }
+
+    fun getBaseStationCount() = allLocationsUnderBaseStations.size
+
+    fun getAreaCount(stationPoint: StationPoint) = allLocationsUnderBaseStations[stationPoint]!!.size
 
     }
 

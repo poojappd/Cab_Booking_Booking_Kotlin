@@ -1,7 +1,7 @@
-package Entities
+package BookingSystem
 
 class AutoRickshaw (vehicleId:UInt, vehicleName :String, numberPlate:String)
-    : Vehicle(vehicleId, vehicleName, VehicleType.BIKE, numberPlate, 3){
+    : Vehicle(vehicleId, vehicleName, VehicleType.AUTO_RICKSHAW, numberPlate, 3){
 
     companion object{
         //waiting charge

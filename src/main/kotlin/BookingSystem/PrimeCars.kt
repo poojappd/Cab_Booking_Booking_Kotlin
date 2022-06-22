@@ -1,4 +1,4 @@
-package Entities
+package BookingSystem
 
 sealed interface PrimeCars {
     var wifiEnabled: Boolean
@@ -9,8 +9,12 @@ sealed interface PrimeCars {
         wifiEnabled = true
         moviesStreaming = true
         musicStreaming = true
-        println("Prime subscription is available for this vehicle!")
-        println("Prime has been activated! Enjoy unlimited wifi with movies and music")
+
+        println("Prime has been activated! " +
+                "\nEnjoy unlimited wifi " +
+                "\n      unlimited movies and music " +
+                "for free!")
+
 
     }
 }

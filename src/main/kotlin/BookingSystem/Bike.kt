@@ -1,4 +1,4 @@
-package Entities
+package BookingSystem
 
 class Bike (vehicleId:UInt, vehicleName :String, numberPlate:String)
     : Vehicle(vehicleId, vehicleName, VehicleType.BIKE, numberPlate, 1){

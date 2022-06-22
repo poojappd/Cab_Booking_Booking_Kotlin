@@ -4,32 +4,41 @@ import App.Database.verifyUser
 import App.UserInput.getIntInput
 import App.UserInput.getMenuChoiceInput
 import App.UserInput.getStringInput
-import Entities.*
-import Entities.Map
+import BookingSystem.*
+import BookingSystem.Map
 import java.time.LocalDateTime
 import kotlin.collections.forEach
 
 
 private data class UserInfo(val fullName: String, val age: UInt, val username: String, val password: String)
 
-private fun viewMapBaseStation():Int{
-    var bases=Map.getBaseLocations()
+private fun viewMapBaseStation() {
+    val bases=Map.getBaseLocations()
     for(i in 1..bases.size){
         println("$i. ${bases[i-1]}")
     }
-    return bases.size
-
 }
 
-private fun viewMapAreaFromStation(stationPoint: StationPoint): Int {
+
+private fun viewMapAreaFromStation(stationPoint: StationPoint) {
    var locationsInStation = Map.getLocationsFromBaseLocation(stationPoint)
 
     for(i in 1..locationsInStation!!.size){
         println("$i. ${locationsInStation[i-1].area}")
     }
+}
 
-    return locationsInStation.size
-
+private fun getPassengerLocation(transportMode: TransportMode): Location {
+    println("Choose the base station for $transportMode")
+    viewMapBaseStation()
+    val stationCount = Map.getBaseStationCount()
+    val passengerCurrentStation = Map.getBaseLocations().get(getMenuChoiceInput(stationCount) - 1)
+    println()
+    println("Choose the area")
+    viewMapAreaFromStation(passengerCurrentStation)
+    val areaCount = Map.getAreaCount(passengerCurrentStation)
+    val chosenMenuOption = getMenuChoiceInput(areaCount)
+    return Map.getLocationsFromBaseLocation(passengerCurrentStation).get(chosenMenuOption-1)
 }
 
 private fun bookCab(passenger: Passenger) {
@@ -39,22 +48,17 @@ private fun bookCab(passenger: Passenger) {
                 "                 2. Choose from other locations"
     )
     var chosenMenuOption = getMenuChoiceInput(2)
-    val passengerCurrentLocation: Location?
-    val passengerDestination: Location?
+    val passengerCurrentLocation: Location
+    val passengerDestination: Location
 
 
     if (chosenMenuOption == 1) {
         passengerCurrentLocation = passenger.locatedArea
-    } else {
-        println("Which base area are you in right now?")
-        val stationCount = viewMapBaseStation()
-        val passengerCurrentStation = Map.getBaseLocations().get(getMenuChoiceInput(stationCount) - 1)
-        println()
-        val areaCount = viewMapAreaFromStation(passengerCurrentStation)
-        chosenMenuOption = getMenuChoiceInput(areaCount)
-
-        passengerCurrentLocation = Map.getLocationsFromBaseLocation(passengerCurrentStation)?.get(chosenMenuOption)
     }
+    else {
+        passengerCurrentLocation = getPassengerLocation(TransportMode.PICKUP)
+    }
+
     println(
         "Select your dropping point\n" +
                 "                 1. To your home\n" +
@@ -64,78 +68,100 @@ private fun bookCab(passenger: Passenger) {
     chosenMenuOption = getMenuChoiceInput(2)
     if (chosenMenuOption == 1) {
         passengerDestination = passenger.locatedArea
-    } else {
-        println("Select your destination area")
-        val stationCount = viewMapBaseStation()
-        val passengerDestinationStation = Map.getBaseLocations().get(getMenuChoiceInput(stationCount) - 1)
-        println()
-        val areaCount = viewMapAreaFromStation(passengerDestinationStation)
-        chosenMenuOption = getMenuChoiceInput(areaCount)
-
-        passengerDestination = Map.getLocationsFromBaseLocation(passengerDestinationStation)?.get(chosenMenuOption)
     }
-    println("Searching cabs...")
-    if (passengerCurrentLocation != null && passengerDestination != null) {
-        val resultList = CabCentralHub.searchCabs(passengerCurrentLocation, passengerDestination)
-        var i = 1
-        if(resultList[0].cabCentreStationPoint != passengerCurrentLocation.stationPoint) {
-            println("No cab centres found at your location..." +
-                    "Contacting nearby cab centres")
-            Thread.sleep(2)
-        }
-        println("Connected with ${resultList[0].cabCentreStationPoint} cab centre ")
-        println()
-        println("____________________________________________________________________________________________________________________________________________________________________")
-        System.out.printf("%25s %25s %25s %25s\n", "S.No.", "Vehicle", "Max Occupants", "Fare")
-        println("____________________________________________________________________________________________________________________________________________________________________")
-        resultList.forEach {
-            System.out.printf(
-                "%25d %25s %25s %25s", i++, it.vehicleType, it.seatCount, it.fare
-            )
-        }
-        val cancelOption: Int = i
-        println(
-            "Choose a vehicle to book your ride\n" +
-                    "Enter " + cancelOption + " to cancel"
-        )
-        chosenMenuOption = getMenuChoiceInput(cancelOption)
+    else {
+       passengerDestination = getPassengerLocation(TransportMode.DROP_OFF)
+    }
 
-        if (chosenMenuOption != cancelOption) {
-            val bookedVehicleInfo = resultList[chosenMenuOption]
+    println("Searching cabs...")
+    val resultList = CabCentralHub.searchCabs(passengerCurrentLocation, passengerDestination)
+    var i = 1
+    if(resultList[0].cabCentreStationPoint != passengerCurrentLocation.stationPoint) {
+        println("No cab centres found at your location..." +
+                "Contacting nearby cab centres")
+        Thread.sleep(2)
+    }
+    println("Connected with ${resultList[0].cabCentreStationPoint} cab centre ")
+    println()
+    println("____________________________________________________________________________________________________________________________")
+    System.out.printf("%25s %25s %25s %25s\n", "S.No.", "Vehicle", "Max Occupants", "Fare")
+    println("____________________________________________________________________________________________________________________________")
+    resultList.forEach {
+        System.out.printf(
+            "%25d %25s %25s %25s\n", i++, it.vehicleType, it.seatCount, it.fare
+        )
+    }
+    val cancelOption: Int = i
+    println(
+        "Choose a vehicle to book your ride\n" +
+                "Enter " + cancelOption + " to cancel"
+    )
+    chosenMenuOption = getMenuChoiceInput(cancelOption)
+
+    if (chosenMenuOption != cancelOption) {
+        val bookedVehicleInfo = resultList[chosenMenuOption - 1]
+        bookedVehicleInfo.let {
+        println(
+            "---------   Chosen Vehicle Details   ---------\n" +
+                    "" +
+                    "Vehicle:       ${it.vehicleType} \n" +
+                    "Seats:         ${it.seatCount} \n" +
+                    "Fare:          Rs. ${it.fare}\n" +
+                    "Driver Name:   ${it.driverName}   \n\n" +
+            "1. Proceed Booking\n" +
+                    "2. Cancel"
+        )
+        }
+
+        chosenMenuOption = getMenuChoiceInput(2)
+
+        if (chosenMenuOption != 2) {
+            val bookingHistory = Booking(
+                IdGenerator.generateBookingId(),
+                passenger.fullName,
+                bookedVehicleInfo.driverName,
+                CabServiceType.CAB_BOOKING,
+                LocalDateTime.now(),
+                passengerCurrentLocation,
+                passengerDestination,
+                bookedVehicleInfo.vehicleType,
+                bookedVehicleInfo.fare
+            )
             val driverId: String = bookedVehicleInfo.driverId
             val cabCentreStationPoint = bookedVehicleInfo.cabCentreStationPoint
             val tripOtp = IdGenerator.generateOtp()
             System.out.println(
-                ("Book " + bookedVehicleInfo.vehicleType +  " for Rs. " + bookedVehicleInfo.fare + " ?\n" +
-                        "1. Book ride\n" +
-                        "2. Cancel")
+                ("Book " + bookedVehicleInfo.vehicleType + " for Rs. " + bookedVehicleInfo.fare + " ?\n" +
+                        "1. Confirm Booking\n" +
+                        "2. Cancel Booking")
             )
             val chosenOption = getMenuChoiceInput(2)
             if (chosenOption == 1) {
+                bookingHistory.bookingStatus = CabBookingStatus.BOOKED
+                val rideOtp = IdGenerator.generateOtp()
+                println(
+                    "Booking Confirmed! \n" +
+                            "Please note this otp for verification " + rideOtp )
 
-                val rideInfo = CabCentralHub.checkCab(passenger.fullName, passengerCurrentLocation, passengerDestination,
-                bookedVehicleInfo.vehicleType, bookedVehicleInfo.cabCentreStationPoint, driverId)
-                val bookingHistory = Booking(
-                    IdGenerator.generateBookingId(),
-                    passenger.fullName, bookedVehicleInfo.driverName, CabServiceType.CAB_BOOKING, LocalDateTime.now(), passengerCurrentLocation,
-                    passengerDestination, bookedVehicleInfo.vehicleType, bookedVehicleInfo.fare)
-                rideInfo?.bookingId = bookingHistory.bookingId
-
-                if(rideInfo != null) {
-                    println(
-                        "Booking Confirmed! \n" +
-                                "Please note this otp for verification " + rideInfo.rideOtp+
-                                "1. Confirm cab" +
-                                "2. Cancel cab ")
-                    chosenMenuOption = getMenuChoiceInput(2)
-                    if(chosenMenuOption == 2){
-                        bookingHistory.bookingStatus = CabBookingStatus.CANCELLED
-                    }
-                    else{
-                        CabCentralHub.confirmCabBooking(bookedVehicleInfo.cabCentreStationPoint, rideInfo, bookingHistory)
-                    }
-                }
+                val rideInfo = CabCentralHub.arrangeCab(
+                    passenger.fullName,
+                    passengerCurrentLocation,
+                    passengerDestination,
+                    bookedVehicleInfo.vehicleType,
+                    bookedVehicleInfo.cabCentreStationPoint,
+                    driverId,
+                    bookingHistory,
+                    rideOtp
+                )
             }
+            else{
+                bookingHistory.bookingStatus = CabBookingStatus.CANCELLED
+                CabCentralHub.updateCancelledBookings(passenger, bookingHistory)
+
+            }
+            passenger.addToBookingHistory(bookingHistory)
+
+
         }
     }
 }
@@ -144,8 +170,6 @@ private fun createUserName(): String {
     var username = ""
     do{
     var userNameExists = true
-
-
     println("Enter a new userName")
     username = getStringInput()
     userNameExists = checkUserNameExists(username)
@@ -229,21 +253,21 @@ fun viewBookingHistory(passenger: Passenger) {
     val bookingHistory = passenger.bookingHistory
     println("---------------------         Booking History         ---------------------\n")
     for (booking in bookingHistory) {
-        println("Booking time:     $booking.cabBookedTime")
+        println("Booking time:     ${booking.cabBookedTime}")
         println("Booking Id:" + booking.bookingId)
         println(
-            "From :            $booking.fromLocation.stationPoint"
-                 + " - $booking.fromLocation.area"
-                + "\nTo :            $booking.toLocation.stationPoint"
-                + " -    $booking.toLocation.area"
+            "From :            ${booking.fromLocation.stationPoint}"
+                 + " - ${booking.fromLocation.area}"
+                + "\nTo :              ${booking.toLocation.stationPoint}"
+                + " -  ${booking.toLocation.area}"
         )
-        println(booking.bookingStatus)
         println("Driver name :     " + booking.driverName)
         println(
             "Vehicle details:  " + booking.vehicleType
         )
-        println("\n Total Fare: -----> " + booking.fare)
-        println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+        println("Booking Status:   "+booking.bookingStatus)
+        println("\nTotal Fare:       " + booking.fare)
+        println("---------------------------------------------------------------------------")
     }
 }
 fun login() {
@@ -252,15 +276,20 @@ fun login() {
     println("And your password...")
     var password = getStringInput().toCharArray()
     var user: User?= verifyUser(userName, password)
-    var toExit = false
     while (user == null) {
-        println("\nInvalid username or password!\nPlease re-enter your account username")
+        println("\nInvalid username or password!\nPlease re-enter your account username" +
+                "\n Enter -1 to go back")
         userName = getStringInput()
-        println("And your password...")
-        password = getStringInput().toCharArray()
-        user = verifyUser(userName, password)
+        if(userName != "-1")
+        {
+            println("And your password...")
+            password = getStringInput().toCharArray()
+            user = verifyUser(userName, password)
+        }
+        else return
     }
-    System.out.println(
+
+    println(
         "Welcome ${user.fullName} !"
     )
     if (user is Passenger) {
@@ -321,4 +350,18 @@ fun main() {
         }
     }
     while (chosenMenuOption != -1)
+}
+fun activatePrime(cabDriver: CabDriver, bookingId:String ): Boolean {
+    println("-------------     Alert!!!     -------------")
+
+    println("Prime subscription is available for this vehicle!")
+    println("1. Activate Prime\n" +
+            "2. Skip")
+    val option = getMenuChoiceInput(2)
+    return option == 1
+}
+
+private enum class TransportMode{
+    PICKUP,
+    DROP_OFF
 }

@@ -1,4 +1,4 @@
-package Entities
+package BookingSystem
 
 import java.util.Random
 import java.util.UUID

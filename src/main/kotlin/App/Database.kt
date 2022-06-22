@@ -1,6 +1,6 @@
 package App
 
-import Entities.User
+import BookingSystem.User
 
 
 object Database {

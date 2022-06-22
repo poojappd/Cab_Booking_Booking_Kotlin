@@ -3,12 +3,13 @@ package App
 import java.util.*
 
 object UserInput {
-    private val input = Scanner(System.`in`)
 
     fun getIntInput(): Int {
+
         var testValue = -1
         var noError = false
         do{
+            val input = Scanner(System.`in`)
         try {
                 testValue = input.nextInt()
                 noError = true

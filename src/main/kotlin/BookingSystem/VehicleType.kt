@@ -1,4 +1,4 @@
-package Entities
+package BookingSystem
 enum class VehicleType{
     BIKE,
     AUTO_RICKSHAW,

@@ -1,4 +1,4 @@
-package Entities
+package BookingSystem
 class Mini(vehicleId:UInt, vehicleName :String,  numberPlate:String)
     : Vehicle(vehicleId, vehicleName, VehicleType.CAR_MINI, numberPlate, 3 ){
 

@@ -1,4 +1,4 @@
-package Entities
+package BookingSystem
 
 internal object CabCentralHub {
    private val allCabCentres:MutableMap<StationPoint, CabCentre> = mutableMapOf()
@@ -51,8 +51,7 @@ internal object CabCentralHub {
       val searchResult:MutableList<CabSearchResult> = mutableListOf()
       chosenCabCentre.allVehiclesInfo.forEach{
          it.value.forEach { vehicleInfo ->
-
-            if (vehicleInfo.availabilityStatus == AvailabilityStatus.AVAILABLE) {
+            if (vehicleInfo.driverAvailabilityStatus == DriverAvailabilityStatus.AVAILABLE) {
                val cabSearchResult = CabSearchResult(chosenCabCentre.locatedAt.stationPoint, vehicleInfo.vehicleType, vehicleInfo.vehicleName, vehicleInfo.seatCount,
                   FareCalculator.calculateFare(vehicleInfo.vehicleType, Map.calculateDistance(fromLocation, toLocation)),
                   vehicleInfo.driverId, chosenCabCentre.getDriverNameFromId(vehicleInfo.driverId)!!)
@@ -71,7 +70,8 @@ internal object CabCentralHub {
       var searchResults:MutableList<CabSearchResult> = mutableListOf()
       var stationPoint = fromLocation.stationPoint
       val nearestCabCentreList = Map.getNearestStationPoints(fromLocation, allCabCentres.keys)
-         for(nearestCabCentre in nearestCabCentreList) {
+         for(i in nearestCabCentreList.size-1 downTo 0) {
+            val nearestCabCentre = nearestCabCentreList[i]
             searchResults = getVehicleInfo(allCabCentres.get(nearestCabCentre)!!, fromLocation, toLocation)
             if (searchResults.size > 0) {
               break
@@ -82,54 +82,44 @@ internal object CabCentralHub {
     }
 
 
-   fun confirmCabBooking(stationPoint: StationPoint, rideInfo: RideInfo, bookingHistory:Booking){
-      allPassengerBookingHistory.put(bookingHistory.bookingId, bookingHistory)
-      allCabCentres.get(stationPoint)?.arrangeCab(rideInfo)
-   }
-
-
-   fun getPassengerBookingHistory(passenger: Passenger, bookingId: String) =
-      allPassengerBookingHistory.get(bookingId)
-
-   fun checkCab(passengerName:String, currentLocation: Location, destination: Location, vehicleType: VehicleType,
-                chosenCabCentrePoint: StationPoint, driverId: String): RideInfo?{
+   fun arrangeCab(passengerName:String, currentLocation: Location, destination: Location, vehicleType: VehicleType,
+                  chosenCabCentrePoint: StationPoint, driverId: String, booking: Booking, rideOtp:Int): RideInfo?{
 
       val chosenCabCentre = allCabCentres.get(chosenCabCentrePoint)
       if(chosenCabCentre != null){
+         allPassengerBookingHistory.put(booking.bookingId, booking)
          val driverName = chosenCabCentre.getDriverNameFromId(driverId)!!
-
-         val rideInfo = RideInfo(passengerName, driverName, driverId, currentLocation,destination, IdGenerator.generateOtp())
+         val rideInfo = RideInfo(passengerName, driverName, driverId, currentLocation, destination, rideOtp)
+         chosenCabCentre.arrangeCab(rideInfo)
+         rideInfo.bookingId = booking.bookingId
          return rideInfo
-
-
-       }
+      }
       return null
 
    }
 
 
-   fun updateDriverStatus(CabDriver: CabDriver, availabilityStatus: AvailabilityStatus?) {
+   fun updateDriverStatus(CabDriver: CabDriver, driverAvailabilityStatus: DriverAvailabilityStatus?) {
       val driverCabCentre = allCabCentres[CabDriver.CabCentre]!!
       val activeVehiclesInfo = driverCabCentre.allVehiclesInfo
       activeVehiclesInfo.forEach { (k: VehicleType, v: MutableList<VehicleInfo>) ->
          for (vehicleInfo in v) {
             if (vehicleInfo.driverId == CabDriver.driverId) {
-               vehicleInfo.availabilityStatus = AvailabilityStatus.BOOKED
+               vehicleInfo.driverAvailabilityStatus = DriverAvailabilityStatus.BOOKED
             }
          }
       }
    }
 
 
-   fun setBookingStatus(CabDriver: CabDriver, bookingId: String, status: CabBookingStatus) {
-      val pastBookingHistory: Booking? = allPassengerBookingHistory[bookingId]
-      allPassengerBookingHistory[bookingId]?.bookingStatus = status
+   fun updateCancelledBookings(passenger: Passenger, booking: Booking){
+      allPassengerBookingHistory.put(booking.bookingId, booking)
    }
 
 
    init {
    val cabCentreLocation = Map.getLocationByIndex(StationPoint.ALANDUR,1)
-   val cabCentre1 = cabCentreLocation?.let {CabCentre(it)}
+   val cabCentre1 = CabCentre(cabCentreLocation)
    val newDriver1 = CabDriver(
       "Perumal",
       35u,
@@ -163,18 +153,16 @@ internal object CabCentralHub {
    val vehicle3 = Bike(IdGenerator.generateVehicleId(newDriver3.CabCentre),"Honda Splendor", "AP7623")
    newDriver3.associatedVehicle = vehicle3
 
-   cabCentre1?.addDriverWithVehicle(vehicle1, newDriver1)
-   cabCentre1?.addDriverWithVehicle(vehicle2, newDriver2)
-   cabCentre1?.addDriverWithVehicle(vehicle3, newDriver3)
-      if (cabCentre1 != null) {
-         addCabCentre(cabCentre1, StationPoint.ALANDUR)
-      }
+      cabCentre1.addDriverWithVehicle(vehicle1, newDriver1)
+      cabCentre1.addDriverWithVehicle(vehicle2, newDriver2)
+      cabCentre1.addDriverWithVehicle(vehicle3, newDriver3)
+      addCabCentre(cabCentre1, StationPoint.ALANDUR)
 
 
 
 
    val cabCentreLocation2 = Map.getLocationByIndex(StationPoint.TAMBARAM,1)
-   val cabCentre2 = cabCentreLocation?.let {CabCentre(it)}
+   val cabCentre2 = CabCentre(cabCentreLocation2)
    val newDriver12 = CabDriver(
       "PerumalSami",
       35u,
@@ -219,18 +207,16 @@ internal object CabCentralHub {
    val vehicle42 = Mini(IdGenerator.generateVehicleId(newDriver42.CabCentre),"Tata Indica", "KN2341")
    newDriver42.associatedVehicle = vehicle42
 
-   cabCentre2?.addDriverWithVehicle(vehicle12, newDriver12)
-   cabCentre2?.addDriverWithVehicle(vehicle22, newDriver22)
-   cabCentre2?.addDriverWithVehicle(vehicle32, newDriver32)
-   cabCentre2?.addDriverWithVehicle(vehicle42, newDriver42)
-   if (cabCentre2 != null) {
+      cabCentre2.addDriverWithVehicle(vehicle12, newDriver12)
+      cabCentre2.addDriverWithVehicle(vehicle22, newDriver22)
+      cabCentre2.addDriverWithVehicle(vehicle32, newDriver32)
+      cabCentre2.addDriverWithVehicle(vehicle42, newDriver42)
       addCabCentre(cabCentre2, StationPoint.TAMBARAM)
-   }
 
 
 
    val cabCentreLocation3 = Map.getLocationByIndex(StationPoint.GUDUVANCHERY,1)
-   val cabCentre3 = cabCentreLocation?.let {CabCentre(it)}
+   val cabCentre3 = CabCentre(cabCentreLocation3)
    val newDriver13 = CabDriver(
       "Ashok",
       39u,
@@ -275,13 +261,11 @@ internal object CabCentralHub {
    val vehicle43 = Mini(IdGenerator.generateVehicleId(newDriver23.CabCentre),"Tata Indica", "KN2341")
    newDriver43.associatedVehicle = vehicle43
 
-   cabCentre3?.addDriverWithVehicle(vehicle13, newDriver13)
-   cabCentre3?.addDriverWithVehicle(vehicle23, newDriver23)
-   cabCentre3?.addDriverWithVehicle(vehicle33, newDriver33)
-   cabCentre3?.addDriverWithVehicle(vehicle43, newDriver43)
-   if (cabCentre3 != null) {
+      cabCentre3.addDriverWithVehicle(vehicle13, newDriver13)
+      cabCentre3.addDriverWithVehicle(vehicle23, newDriver23)
+      cabCentre3.addDriverWithVehicle(vehicle33, newDriver33)
+      cabCentre3.addDriverWithVehicle(vehicle43, newDriver43)
       addCabCentre(cabCentre3, StationPoint.GUDUVANCHERY)
-   }
    }
 }
 

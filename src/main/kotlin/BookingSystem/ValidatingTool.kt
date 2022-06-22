@@ -1,4 +1,4 @@
-package Entities
+package BookingSystem
 object ValidatingTool {
 
     fun validatePassword(password: String): Boolean {

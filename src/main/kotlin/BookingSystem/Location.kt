@@ -1,11 +1,11 @@
-package Entities
+package BookingSystem
 
 enum class StationPoint{
     THAILAVARAM,
     GUDUVANCHERY,
     VANDALUR,
     TAMBARAM,
-    SANITORIUM,
+    TAMBARAM_SANATORIUM,
     CHROMEPET,
     PALLAVARAM,
     PAMMAL,

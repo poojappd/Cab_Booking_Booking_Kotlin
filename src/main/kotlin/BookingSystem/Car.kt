@@ -1,4 +1,4 @@
-package Entities
+package BookingSystem
 
 class PrimeSedan(vehicleId:UInt, vehicleName :String, numberPlate:String,
                  override var wifiEnabled: Boolean = false, override var moviesStreaming: Boolean = false,

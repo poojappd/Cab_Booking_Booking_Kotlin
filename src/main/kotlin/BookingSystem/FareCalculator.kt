@@ -1,6 +1,6 @@
-package Entities
+package BookingSystem
 
-import Entities.VehicleType.*
+import BookingSystem.VehicleType.*
 
 object FareCalculator {
     private const val accessFee = 7.35

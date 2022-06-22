@@ -1,4 +1,4 @@
-package Entities
+package BookingSystem
 
 object VehicleRegistry {
     private val registeredVehicles : MutableList<String> = mutableListOf()

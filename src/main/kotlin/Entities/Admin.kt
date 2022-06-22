@@ -1,5 +1,0 @@
-package Entities
-
-object Admin {
-
-}
