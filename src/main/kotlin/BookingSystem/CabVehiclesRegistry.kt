@@ -1,6 +1,6 @@
 package BookingSystem
 
-object VehicleRegistry {
+object CabVehiclesRegistry {
     private val registeredVehicles : MutableList<String> = mutableListOf()
 
     fun registerVehicle(numberPlateId:String): Boolean {

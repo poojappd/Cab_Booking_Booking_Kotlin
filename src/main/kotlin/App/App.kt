@@ -1,6 +1,7 @@
 package App
 import App.Database.checkUserNameExists
 import App.Database.verifyUser
+import App.UserInput.getInputFromRange
 import App.UserInput.getIntInput
 import App.UserInput.getMenuChoiceInput
 import App.UserInput.getStringInput
@@ -8,6 +9,7 @@ import BookingSystem.*
 import BookingSystem.Map
 import java.time.LocalDateTime
 import kotlin.collections.forEach
+import kotlin.collections.toList
 
 
 private data class UserInfo(val fullName: String, val age: UInt, val username: String, val password: String)
@@ -74,6 +76,7 @@ private fun bookCab(passenger: Passenger) {
     }
 
     println("Searching cabs...")
+    Thread.sleep(1500)
     val resultList = CabCentralHub.searchCabs(passengerCurrentLocation, passengerDestination)
     var i = 1
     if(resultList[0].cabCentreStationPoint != passengerCurrentLocation.stationPoint) {
@@ -81,6 +84,7 @@ private fun bookCab(passenger: Passenger) {
                 "Contacting nearby cab centres")
         Thread.sleep(2)
     }
+    Thread.sleep(2000)
     println("Connected with ${resultList[0].cabCentreStationPoint} cab centre ")
     println()
     println("____________________________________________________________________________________________________________________________")
@@ -90,7 +94,9 @@ private fun bookCab(passenger: Passenger) {
         System.out.printf(
             "%25d %25s %25s %25s\n", i++, it.vehicleType, it.seatCount, it.fare
         )
+
     }
+    println("____________________________________________________________________________________________________________________________")
     val cancelOption: Int = i
     println(
         "Choose a vehicle to book your ride\n" +
@@ -142,6 +148,7 @@ private fun bookCab(passenger: Passenger) {
                 println(
                     "Booking Confirmed! \n" +
                             "Please note this otp for verification " + rideOtp )
+                Thread.sleep(2500)
 
                 val rideInfo = CabCentralHub.arrangeCab(
                     passenger.fullName,
@@ -228,46 +235,135 @@ private fun createPassengerAccount() {
 
     val choice = getMenuChoiceInput(locationsInStation.size)
     val homeLocation = locationsInStation[choice - 1]
-
     val newPassenger = Passenger(
         userInfo.username, userInfo.password, userInfo.fullName, userInfo.age, homeLocation)
     Database.addUser(newPassenger, userInfo.password)
     println("Account created successfuly! \n Please login to use the application!")
 }
 
+private fun createDriverAccount(){
+    val userInfo: UserInfo = getUserInfo()
+    println("In which of these areas would you like to work at?\n")
+    var index = 1
+    val cabCentreFunctioningPoints = CabCentralHub.viewFunctioningStationPoints().run{
+        forEach{
+        println("${index++}. $it")
+    }
+        toList()
+    }
+    val cabCentreStationPoint = cabCentreFunctioningPoints.run {
+        get(getMenuChoiceInput(size) - 1)
+    }
+    println("Do you have a vehicle for picking up customers?")
+    println("1.Yes\n2.No\n")
+    val hasVehicle = getMenuChoiceInput(2)
+    println("Choose your suited vehicle type:\n" +
+            "1. Car\n" +
+            "2. Auto Rickshaw\n" +
+            "3. Bike")
+    val vehicleTypeOption = getMenuChoiceInput(3)
 
+    if (hasVehicle == 1) {
+        println(
+            "Enter the details of your Vehicle:\n Vehicle Model" +
+                    "\neg. Maruti Suzuki Swift: "
+        )
+        val vehicleName = getStringInput()
+        println(
+            "Enter your vehicle's plate number\n" +
+                    "Note: Plate number should contain 2 letters followed by 4 numbers\n" +
+                    "eg. TN3453"
+        )
+        var plateNumber: String = getStringInput()
+        var isNumberPlateValid = ValidatingTool.validateNumberPlate((plateNumber))
+
+        while (!isNumberPlateValid) {
+            println("The number plate is not valid! Please re-enter")
+            plateNumber = getStringInput()
+            isNumberPlateValid = ValidatingTool.validateNumberPlate(plateNumber)
+        }
+
+        val newVehicle = when(vehicleTypeOption){
+            1->{
+                println("Enter the number of seats in your car excluding driver's seat" +
+                        "\nNote: seat count ranges from 3 to 6")
+                val seatCount = getInputFromRange(3,6)
+                when(seatCount){
+                    3-> Mini(IdGenerator.generateVehicleId(cabCentreStationPoint), vehicleName, plateNumber)
+                    4-> PrimeSedan(IdGenerator.generateVehicleId(cabCentreStationPoint), vehicleName,
+                    plateNumber)
+                    else -> PrimeSUV(IdGenerator.generateVehicleId(cabCentreStationPoint),  vehicleName, plateNumber)
+                }
+
+            }
+            2-> AutoRickshaw(IdGenerator.generateVehicleId(cabCentreStationPoint), vehicleName, plateNumber)
+            else -> Bike(IdGenerator.generateVehicleId(cabCentreStationPoint), vehicleName, plateNumber)
+        }
+        val newDriver = CabDriver(userInfo.fullName, userInfo.age, userInfo.username, userInfo.password,
+                                    cabCentreStationPoint, IdGenerator.generateDriverId(cabCentreStationPoint)  )
+        newDriver.associatedVehicle = newVehicle
+    }
+    else{
+
+        val vehicleType =
+            when(vehicleTypeOption){
+                3 -> VehicleType.BIKE
+                2 -> VehicleType.AUTO_RICKSHAW
+                else ->
+                {
+                    println("Enter your years of experience as a driver")
+                    val experienceInYears = getInputFromRange(1, 60)
+                    when(experienceInYears){
+                        in 1..5 -> VehicleType.CAR_MINI
+                        in 6..10 -> VehicleType.CAR_SEDAN
+                        else -> VehicleType.CAR_SUV
+                    }
+                }
+            }
+        val newDriver = CabDriver(userInfo.fullName, userInfo.age, userInfo.username, userInfo.password,
+            cabCentreStationPoint, IdGenerator.generateDriverId(cabCentreStationPoint) )
+
+        CabCentralHub.addDriverOnly(newDriver, vehicleType)
+
+    }
+    println("Driver account created successfully. \nYou have been added to $cabCentreStationPoint cab centre")
+
+}
 private fun chooseAccountForNewUser() {
     println(
         "Choose your Account type\n" +
-                "                1. User\n" +
-                "                2. Driver"
+                " 1. User\n" +
+                " 2. Driver"
     )
     val chosenMenuOption = getMenuChoiceInput(2)
     when (chosenMenuOption) {
         1 -> createPassengerAccount()
-       // 2 -> createDriverAccount()
+        2 -> createDriverAccount()
     }
 }
 
 fun viewBookingHistory(passenger: Passenger) {
     val bookingHistory = passenger.bookingHistory
     println("---------------------         Booking History         ---------------------\n")
+    var index = 1
     for (booking in bookingHistory) {
+        println("Booking #${index++}")
+        println("Booking Id:       " + booking.bookingId)
         println("Booking time:     ${booking.cabBookedTime}")
-        println("Booking Id:" + booking.bookingId)
+
         println(
-            "From :            ${booking.fromLocation.stationPoint}"
+            "From:             ${booking.fromLocation.stationPoint}"
                  + " - ${booking.fromLocation.area}"
                 + "\nTo :              ${booking.toLocation.stationPoint}"
                 + " -  ${booking.toLocation.area}"
         )
-        println("Driver name :     " + booking.driverName)
+        println("Driver name:      " + booking.driverName)
         println(
             "Vehicle details:  " + booking.vehicleType
         )
         println("Booking Status:   "+booking.bookingStatus)
         println("\nTotal Fare:       " + booking.fare)
-        println("---------------------------------------------------------------------------")
+        println("---------------------------------------------------------------------------\n")
     }
 }
 fun login() {
@@ -289,9 +385,6 @@ fun login() {
         else return
     }
 
-    println(
-        "Welcome ${user.fullName} !"
-    )
     if (user is Passenger) {
         passengerServices(user)
     } else if (user is CabDriver) {
@@ -303,8 +396,8 @@ fun login() {
 fun passengerServices(passenger: Passenger) {
     do{
     var logout = false
-
-        println("How may we help you?")
+        println("\n\n---------------------         Homepage         ---------------------")
+        println("\nHi ${passenger.fullName}, How may we help you?")
         println("1. Book cab\n" +
                 "2. Schedule a cab ride\n" +
                 "3. Rent a cab\n" +
@@ -326,9 +419,8 @@ fun passengerServices(passenger: Passenger) {
 
 fun viewWelcomeScreen() {
     println(
-        "**********************************************************\n" +
-                "            Cab Booking System\n" +
-        "**********************************************************\n" +
+        "---------------------         Cab Booking System         ---------------------" +
+
                 "Choose the following option to continue\n" +
                 "                \n" +
                 "1.  New User\n" +

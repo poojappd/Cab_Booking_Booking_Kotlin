@@ -2,7 +2,6 @@ package BookingSystem
 
 import java.io.BufferedReader
 import java.io.FileReader
-import java.util.*
 
 object Map {
     private val allLocationsUnderBaseStations = mutableMapOf<StationPoint, MutableList<Location>>()
@@ -37,15 +36,16 @@ object Map {
 
     fun getLocationsFromBaseLocation(baseLocation: StationPoint) = allLocationsUnderBaseStations[baseLocation]!!.toList()
 
-    internal fun calculateDistance(fromLocation: Location, toLocation: Location) :Double {
+    internal fun calculateDistance(fromLocation: Location, toLocation: Location): Double {
         val x1Coordinate = fromLocation.x_coordinate
         val y1Coordinate = fromLocation.y_coordinate
         val x2Coordinate = toLocation.x_coordinate
         val y2Coordinate = toLocation.y_coordinate
 
-        val distance = Math.sqrt((Math.pow((x2Coordinate - x1Coordinate), 2.0))
-                + Math.pow((y2Coordinate - y1Coordinate),2.0)) *100
-        return distance
+        return Math.sqrt(
+            (Math.pow((x2Coordinate - x1Coordinate), 2.0))
+                    + Math.pow((y2Coordinate - y1Coordinate), 2.0)
+        ) * 100
     }
 
     fun getLocationByIndex(baseStationPoint: StationPoint, index:Int) =
