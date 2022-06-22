@@ -15,8 +15,8 @@ class CabCentre (val locatedAt: Location){
 
     }
 
-    internal fun addDriverWithVehicle(newVehicle: Vehicle, newDriver: CabDriver) :Response{
-        if(!CabVehiclesRegistry.checkVehicleRegistered(newVehicle.numberPlate))
+    internal fun addDriverWithVehicle(newVehicle: Vehicle, newDriver: CabDriver,  cabCentre: CabCentre? = null) :Response{
+        if(!CabVehiclesRegistry.checkVehicleRegistered(newVehicle.numberPlate) || cabCentre!= null)
         {
             newVehicle.vehicleDriverId = newDriver.driverId
             allVehicles[newVehicle.vehicleType]!!.add(newVehicle)
@@ -27,17 +27,20 @@ class CabCentre (val locatedAt: Location){
                     newDriver.fullName, newVehicle.vehicleName, newVehicle.maxOccupants
                 )
             )
-            CabVehiclesRegistry.registerVehicle(newVehicle.numberPlate)
+            if(cabCentre == null) {
+                CabVehiclesRegistry.registerVehicle(newVehicle.numberPlate)
+            }
             return Response.SUCCESS
         }
         else return Response.DUPLICATE_ENTRY_FOUND_FOR_VEHICLE
-
-
     }
 
-    internal fun addDriver(newDriver: CabDriver, drivableVehicle: VehicleType){
+    internal fun addDriver(newDriver: CabDriver, drivableVehicle: VehicleType): VehicleInfo {
         val newVehicle = Garage.manufactureVehicle(drivableVehicle, locatedAt.stationPoint)
-        addDriverWithVehicle(newVehicle, newDriver)
+        newDriver.associatedVehicle = newVehicle
+        addDriverWithVehicle(newVehicle, newDriver, this)
+        return VehicleInfo(newVehicle.vehicleType, newVehicle.vehicleId, newVehicle.numberPlate, newDriver.driverId,
+                                newDriver.fullName, newVehicle.vehicleName,newVehicle.maxOccupants)
 
     }
 
@@ -51,6 +54,16 @@ class CabCentre (val locatedAt: Location){
         return allDrivers[driverId]?.fullName
     }
 
+    fun removeDriver(cabDriver: CabDriver){
+        allDrivers.remove(cabDriver.driverId)
+        allVehiclesInfo.get(cabDriver.associatedVehicle?.vehicleType)?.forEach{
+            if(it.driverId == cabDriver.driverId){
+                it.driverName =""
+                it.driverId = ""
+                it.driverAvailabilityStatus = DriverAvailabilityStatus.NOT_AVAILABLE
+            }
+        }
+    }
 
 
 }

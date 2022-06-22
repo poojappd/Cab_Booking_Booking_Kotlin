@@ -55,12 +55,12 @@ object Map {
         val cabCentreWithDistance = mutableMapOf<Location, Double>()
 
         ToStationPoints.forEach {
-            if (it != fromLocation.stationPoint) {
+
                 val destination = allLocationsUnderBaseStations.get(it)!!.get(0)
                 val currentDistance = calculateDistance(fromLocation, destination)
                 cabCentreWithDistance.put(destination, currentDistance)
 
-            }
+
         }
     return cabCentreWithDistance
     }

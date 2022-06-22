@@ -19,7 +19,7 @@ object Garage{
         var newNumberPlate:String
 
         run loop@{
-            do {
+           do {
                 value++
                 val appendString = "".run {
                     when (value) {
@@ -45,8 +45,8 @@ object Garage{
             VehicleType.BIKE -> Bike(vehicleId, bikeModels[Random().nextInt(0, bikeModels.size)], newNumberPlate)
             VehicleType.AUTO_RICKSHAW -> AutoRickshaw(vehicleId, autoModels[0], newNumberPlate)
             VehicleType.CAR_MINI -> Mini(vehicleId, miniModels[Random().nextInt(0, miniModels.size)], newNumberPlate)
-            VehicleType.CAR_SEDAN -> Bike(vehicleId, sedanModels[Random().nextInt(0, sedanModels.size)], newNumberPlate)
-            VehicleType.CAR_SUV -> Bike(vehicleId, SUVModels[Random().nextInt(0, SUVModels.size)], newNumberPlate)
+            VehicleType.CAR_SEDAN -> PrimeSedan(vehicleId, sedanModels[Random().nextInt(0, sedanModels.size)], newNumberPlate)
+            VehicleType.CAR_SUV -> PrimeSUV(vehicleId, SUVModels[Random().nextInt(0, SUVModels.size)], newNumberPlate)
         }
 
         return newVehicle

@@ -5,12 +5,14 @@ import BookingSystem.User
 
 object Database {
     private val allUsers: MutableMap<String, User> = mutableMapOf()
-    private val userCredentials = HashMap<String, CharArray>()
+    private val userCredentials = mutableMapOf<String, CharArray>()
 
     //driverId
     fun verifyUser(userName: String, password: CharArray): User? {
         val actualUserEncryptedPassword: CharArray
         val actualUserPassword: CharArray
+        println(userCredentials)
+
         val actualUser = allUsers.get(userName)
         if (actualUser != null) {
             actualUserEncryptedPassword = userCredentials.get(actualUser.userName)!!

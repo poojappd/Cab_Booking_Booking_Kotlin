@@ -26,19 +26,13 @@ internal object CabCentralHub {
 
    }
 
-   fun addDriverOnly(newDriver: CabDriver, drivableVehicle: VehicleType): Response {
+   fun addDriverOnly(newDriver: CabDriver, drivableVehicle: VehicleType):VehicleInfo? {
       val response: Response
-      var cabCentre = allCabCentres[newDriver.CabCentre]
-      response = if (cabCentre != null) {
-         cabCentre.addDriver(newDriver, drivableVehicle)
-         Response.SUCCESS
+      val cabCentre = allCabCentres[newDriver.CabCentre]
+      if (cabCentre != null) {
+         return cabCentre.addDriver(newDriver, drivableVehicle)
       }
-
-   else {
-         Response.NO_SUCH_CAB_CENTRES
-      }
-
-   return response
+      return null
    }
 
 
@@ -116,6 +110,9 @@ internal object CabCentralHub {
       allPassengerBookingHistory.put(booking.bookingId, booking)
    }
 
+   fun removeDriver(cabCentreStationPoint: StationPoint, cabDriver: CabDriver){
+      allCabCentres.get(cabCentreStationPoint)?.removeDriver(cabDriver)
+   }
 
    init {
    val cabCentreLocation = Map.getLocationByIndex(StationPoint.ALANDUR,1)
@@ -193,7 +190,7 @@ internal object CabCentralHub {
       StationPoint.TAMBARAM,
       IdGenerator.generateDriverId(StationPoint.TAMBARAM)
    )
-   val vehicle32 = Bike(IdGenerator.generateVehicleId(newDriver32.CabCentre),"Honda Splendor", "AP7623")
+   val vehicle32 = Bike(IdGenerator.generateVehicleId(newDriver32.CabCentre),"Honda Splendor", "AP7625")
    newDriver32.associatedVehicle = vehicle32
 
    val newDriver42 = CabDriver(
@@ -247,7 +244,7 @@ internal object CabCentralHub {
       StationPoint.GUDUVANCHERY,
       IdGenerator.generateDriverId(StationPoint.GUDUVANCHERY)
    )
-   val vehicle33 = Bike(IdGenerator.generateVehicleId(newDriver23.CabCentre),"Honda Splendor", "AP7623")
+   val vehicle33 = Bike(IdGenerator.generateVehicleId(newDriver23.CabCentre),"Honda Splendor", "AP9623")
    newDriver33.associatedVehicle = vehicle33
 
    val newDriver43 = CabDriver(
@@ -258,7 +255,7 @@ internal object CabCentralHub {
       StationPoint.GUDUVANCHERY,
       IdGenerator.generateDriverId(StationPoint.GUDUVANCHERY)
    )
-   val vehicle43 = Mini(IdGenerator.generateVehicleId(newDriver23.CabCentre),"Tata Indica", "KN2341")
+   val vehicle43 = Mini(IdGenerator.generateVehicleId(newDriver23.CabCentre),"Tata Indica", "KN7771")
    newDriver43.associatedVehicle = vehicle43
 
       cabCentre3.addDriverWithVehicle(vehicle13, newDriver13)

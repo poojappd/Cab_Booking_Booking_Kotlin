@@ -1,7 +1,7 @@
 package BookingSystem
 
 object CabVehiclesRegistry {
-    private val registeredVehicles : MutableList<String> = mutableListOf()
+    private val registeredVehicles : MutableSet<String> = mutableSetOf()
 
     fun registerVehicle(numberPlateId:String): Boolean {
         if(ValidatingTool.validateNumberPlate(numberPlateId)){
