@@ -12,4 +12,8 @@ object ValidatingTool {
     fun validateNumberPlate(numberPlate: String): Boolean {
         return numberPlate.matches(Regex("^[A-Za-z]{2}[0-9]{4}\\z"))
     }
+
+    fun validateUserName(userName: String): Boolean {
+        return userName.length > 2
+    }
 }

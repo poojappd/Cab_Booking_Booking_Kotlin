@@ -12,7 +12,13 @@ import kotlin.collections.forEach
 import kotlin.collections.toList
 
 
-private data class UserInfo(val fullName: String, val age: UInt, val username: String, val password: String)
+private data class UserInfo
+    (val fullName: String,
+     val age: UInt,
+     val username: String,
+     val password: String
+     )
+
 
 private fun driverServices(cabDriver: CabDriver){
     println("---------------------         Driver Services         ---------------------")
@@ -33,9 +39,9 @@ private fun viewMapBaseStation() {
 
 
 private fun viewMapAreaFromStation(stationPoint: StationPoint) {
-   var locationsInStation = Map.getLocationsFromBaseLocation(stationPoint)
+   val locationsInStation = Map.getLocationsFromBaseLocation(stationPoint)
 
-    for(i in 1..locationsInStation!!.size){
+    for(i in 1..locationsInStation.size){
         println("$i. ${locationsInStation[i-1].area}")
     }
 }
@@ -187,14 +193,19 @@ private fun bookCab(passenger: Passenger) {
 private fun createUserName(): String {
     var username = ""
     do{
-    var userNameExists = true
-    println("Enter a new userName")
-    username = getStringInput()
-    userNameExists = checkUserNameExists(username)
-    if (userNameExists) {
-            println("Username already exists! please enter a new username")
-    }
-    }while (userNameExists)
+        var userNameExists = true
+        var userNameLengthValid = false
+        println("Enter a new userName")
+        username = getStringInput()
+        userNameExists = checkUserNameExists(username)
+        userNameLengthValid = ValidatingTool.validateUserName(username)
+        if (userNameExists) {
+                println("Username already exists! please enter a new username")
+        }
+        else if (!userNameLengthValid){
+            println("Username too short! enter a username of more than 3 characters")
+        }
+    }while (userNameExists || !userNameLengthValid)
     return username
 }
 
@@ -398,29 +409,31 @@ fun viewBookingHistory(passenger: Passenger) {
         println("---------------------------------------------------------------------------\n")
     }
 }
+
 fun login() {
-    println("Enter your username")
-    var userName = getStringInput()
-    println("And your password...")
-    var password = getStringInput().toCharArray()
-    var user: User?= verifyUser(userName, password)
-    while (user == null) {
-        println("\nInvalid username or password!\nPlease re-enter your account username" +
-                "\n Enter -1 to go back")
-        userName = getStringInput()
-        if(userName != "-1")
-        {
-            println("And your password...")
-            password = getStringInput().toCharArray()
-            user = verifyUser(userName, password)
+    var user: User? = null
+    do{
+        println("Enter your username")
+        val userName = getStringInput()
+
+        if(userName == "-1"){
+            return
         }
-        else return
+        println("And your password...")
+        val password = getStringInput().toCharArray()
+        user = verifyUser(userName, password)
+
+        if(user == null) {
+            println("\nInvalid username or password!\nPlease re-enter your account username" +
+                        "\n Enter -1 to go back")
+        }
     }
+    while (user == null)
 
     if (user is Passenger) {
         passengerServices(user)
     } else if (user is CabDriver) {
-        driverServices(user);
+        driverServices(user)
     }
 }
 
@@ -433,7 +446,6 @@ fun passengerServices(passenger: Passenger) {
         println("1. Book cab\n" +
                 "2. View Booking History\n" +
                 "3. Logout of account"
-
         )
         val chosenMenuOption = getMenuChoiceInput(3)
         when (chosenMenuOption) {
@@ -465,6 +477,7 @@ fun main() {
         viewWelcomeScreen()
         chosenMenuOption = getMenuChoiceInput(2, -1)
         println(chosenMenuOption)
+
         when (chosenMenuOption) {
             1 -> chooseAccountForNewUser()
             2 -> login()
@@ -472,9 +485,9 @@ fun main() {
     }
     while (chosenMenuOption != -1)
 }
+
 fun activatePrime(cabDriver: CabDriver, bookingId:String ): Boolean {
     println("-------------     Alert!!!     -------------")
-
     println("Prime subscription is available for this vehicle!")
     println("1. Activate Prime\n" +
             "2. Skip")
