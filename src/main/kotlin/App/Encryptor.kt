@@ -1,18 +1,19 @@
 package App
 
 object Encryptor {
-    fun encrypt(s: String): CharArray {
+    fun encrypt(s: String): String {
         val temp = s.toCharArray()
         for (i in temp.indices) {
-            temp[i] = ((temp[i].code + 1) * 10).toChar()
+            temp[i] = (1 + (temp[i].code * 10)).toChar()
         }
-        return temp
+        return temp.joinToString("")
     }
 
-    fun decrypt(s: CharArray): CharArray {
-        for (i in s.indices) {
-            s[i] = (s[i].code / 10 - 1).toChar()
+    fun decrypt(st: String): String {
+        val s = st.toCharArray()
+        for (i in st.indices) {
+            s[i] = ((-1 + s[i].code) / 10 ).toChar()
         }
-        return s
+        return s.joinToString("")
     }
 }

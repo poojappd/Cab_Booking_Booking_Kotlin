@@ -5,20 +5,18 @@ import BookingSystem.User
 
 object Database {
     private val allUsers: MutableMap<String, User> = mutableMapOf()
-    private val userCredentials = mutableMapOf<String, CharArray>()
+    private val userCredentials = mutableMapOf<String, String>()
 
 
-    fun verifyUser(userName: String, password: CharArray): User? {
-        val actualUserEncryptedPassword: CharArray
-        val actualUserPassword: CharArray
+    fun verifyUser(userName: String, password: String): User? {
+
         val actualUser = allUsers.get(userName)
+        val actualUserEncryptedPassword = userCredentials.get(actualUser?.userName)
+        val actualUserPassword = actualUserEncryptedPassword?.let { Encryptor.decrypt(it) }
 
-        if (actualUser != null) {
-            actualUserEncryptedPassword = userCredentials.get(actualUser.userName)!!
-            actualUserPassword = Encryptor.decrypt(actualUserEncryptedPassword)
-            if (actualUserPassword.contentEquals(password)) {
-                return actualUser
-            }
+        if (actualUserPassword.contentEquals(password)) {
+            return actualUser
+
         }
         return null
     }

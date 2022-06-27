@@ -420,7 +420,7 @@ fun login() {
             return
         }
         println("And your password...")
-        val password = getStringInput().toCharArray()
+        val password = getStringInput()
         user = verifyUser(userName, password)
 
         if(user == null) {
